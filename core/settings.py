@@ -176,9 +176,9 @@ MEDIA_URL = '/media/'
 # =============================================================================
 
 CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': config('CLOUDINARY_CLOUD_NAME', default=''),
-    'API_KEY': config('CLOUDINARY_API_KEY', default=''),
-    'API_SECRET': config('CLOUDINARY_API_SECRET', default=''),
+    'CLOUD_NAME': config('CLOUDINARY_CLOUD_NAME', default='pending_cloud_name'),
+    'API_KEY': config('CLOUDINARY_API_KEY', default='pending_api_key'),
+    'API_SECRET': config('CLOUDINARY_API_SECRET', default='pending_api_secret'),
 }
 
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
