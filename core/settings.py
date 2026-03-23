@@ -44,6 +44,8 @@ THIRD_PARTY_APPS = [
     'rest_framework_simplejwt',
     'corsheaders',
     'drf_spectacular',
+    'cloudinary_storage',
+    'cloudinary',
 ]
 
 LOCAL_APPS = [
@@ -167,7 +169,18 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+
+# =============================================================================
+# CLOUDINARY STORAGE CONFIGURATION
+# =============================================================================
+
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': config('CLOUDINARY_CLOUD_NAME', default='pending_cloud_name'),
+    'API_KEY': config('CLOUDINARY_API_KEY', default='pending_api_key'),
+    'API_SECRET': config('CLOUDINARY_API_SECRET', default='pending_api_secret'),
+}
+
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
 # =============================================================================
 # DEFAULT PRIMARY KEY
