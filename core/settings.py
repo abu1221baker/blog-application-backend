@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = config('SECRET_KEY')
 DEBUG = config('DEBUG', default=False, cast=bool)
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='*', cast=Csv())
 
 # =============================================================================
 # APPLICATIONS
@@ -108,13 +108,28 @@ if config('USE_SQLITE', default=True, cast=bool):
         }
     }
 else:
+    # Ensure DATABASE_URL is used if not using SQLite
+    database_url = config('DATABASE_URL', default=None)
+    if not database_url:
+        # Fallback to individual components if URL isn't provided
+        database_url = f"mysql://{config('DB_USER')}:{config('DB_PASSWORD')}@{config('DB_HOST')}:{config('DB_PORT')}/{config('DB_NAME')}"
+    
+    # Configure database using URL
     DATABASES = {
         'default': dj_database_url.config(
-            default=config('DATABASE_URL'),
+            default=database_url,
             conn_max_age=600,
             conn_health_checks=True,
         )
     }
+
+    # Add SSL configuration for TiDB/MySQL
+    if 'sqlite' not in DATABASES['default']['ENGINE']:
+        DATABASES['default']['OPTIONS'] = {
+            'ssl': {
+                'ca': config('DB_SSL_CA', default=certifi.where())
+            }
+        }
 
 
 # =============================================================================
@@ -212,11 +227,27 @@ SPECTACULAR_SETTINGS = {
 }
 
 # =============================================================================
-# CORS
+# CORS & CSRF
 # =============================================================================
 
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOWED_ORIGINS = config('CORS_ALLOWED_ORIGINS', default='http://localhost:5173', cast=Csv())
 CORS_ALLOW_CREDENTIALS = True
+
+CSRF_TRUSTED_ORIGINS = config('CSRF_TRUSTED_ORIGINS', default='http://localhost:5173', cast=Csv())
+
+# =============================================================================
+# PRODUCTION SECURITY SETTINGS
+# =============================================================================
+
+# Only enable these in production with HTTPS
+SECURE_SSL_REDIRECT = config('SECURE_SSL_REDIRECT', default=False, cast=bool)
+SESSION_COOKIE_SECURE = config('SESSION_COOKIE_SECURE', default=False, cast=bool)
+CSRF_COOKIE_SECURE = config('CSRF_COOKIE_SECURE', default=False, cast=bool)
+
+# Other security headers
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+X_FRAME_OPTIONS = 'DENY'
 
 # =============================================================================
 # FILE UPLOAD LIMITS
